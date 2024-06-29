@@ -1,0 +1,144 @@
+syntax = "proto3";
+
+package api;
+import "google/api/annotations.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+
+option go_package = "./pkg/api";
+option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
+  info: {
+    title: "Host Editor Service"
+    version: "1.0"
+    contact: {
+      name: "Ivan Orshak"
+      url: "https://github.com/stensh1/hostEditor"
+      email: "ivan.orshk@gmail.com"
+    };
+    license: {
+      name: "BSD 3-Clause License";
+      url: "https://github.com/grpc-ecosystem/grpc-gateway/blob/master/LICENSE.txt";
+    };
+  };
+  external_docs: {
+    url: "https://github.com/grpc-ecosystem/grpc-gateway";
+    description: "More about gRPC-Gateway";
+  }
+  schemes: HTTP;
+  schemes: HTTPS;
+  consumes: "application/json";
+  produces: "application/json";
+
+  responses: {
+    key: "403";
+    value: {
+      description: "Returned when the user does not have permission to access the resource.";
+    }
+  }
+  responses: {
+    key: "404";
+    value: {
+      description: "Returned when the resource does not exist.";
+      schema: {
+        json_schema: {
+          type: STRING;
+        }
+      }
+    }
+  }
+};
+
+
+// Services
+
+// Service for managing the list of servers
+service Editor {
+  // Changing Linux hostname
+  rpc SetName(SetNameRequest) returns (SetNameResponse) {
+    option (google.api.http) = {
+      patch: "/set_hostname/{hostname}"
+      body: "*"
+    };
+  }
+  // Getting current Linux hostname
+  rpc GetName(GetNameRequest) returns (GetNameResponse) {
+    option (google.api.http) = {
+      get: "/hostname"
+    };
+  }
+  // Adding the new DNS server to the list
+  rpc Add(AddRequest) returns (AddResponse) {
+    option (google.api.http) = {
+      post: "/addDNS/{dns_server}"
+      body: "*"
+    };
+  }
+  // Removing the DNS server from the list
+  rpc Remove(RemoveRequest) returns (RemoveResponse) {
+    option (google.api.http) = {
+      delete: "/delete/{dns_server}"
+    };
+  }
+  // Getting full list of DNS servers
+  rpc List(ListRequest) returns (ListResponse) {
+    option (google.api.http) = {
+      get: "/DNS_list"
+    };
+  }
+}
+
+// Service for authorizing
+service Authorizer {
+  rpc Login(LoginRequest) returns (LoginResponse) {
+    option (google.api.http) = {
+      get: "/api/session"
+    };
+  }
+}
+
+
+// Arguments
+
+// Editor
+message SetNameRequest {
+  string hostname = 1;
+}
+message SetNameResponse {
+  bool ok = 1;
+  string message = 2;
+}
+
+message GetNameRequest {}
+message GetNameResponse {
+  string hostname = 1;
+}
+
+message AddRequest {
+  string dns_server = 1;
+}
+message AddResponse {
+  bool ok = 1;
+  string message = 2;
+}
+
+message RemoveRequest {
+  string dns_server = 1;
+}
+message RemoveResponse {
+  bool ok = 1;
+  string message = 2;
+}
+
+message ListRequest {}
+message ListResponse {
+  repeated string dns_servers = 1;
+}
+
+// Authorizer
+message LoginRequest {
+  string username = 1;
+  string password = 2;
+}
+message LoginResponse {
+  bool ok = 1;
+  string message = 2;
+}
