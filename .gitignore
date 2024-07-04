@@ -18,8 +18,9 @@
 # vendor/
 .idea
 .bin
-.env
-.cfg
+
+# Redis files
+*.rdb
 
 # Go workspace file
 go.work

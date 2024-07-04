@@ -1,0 +1,10 @@
+# server config
+
+server:
+  host:
+  port: 9000
+  http_proxy_port: 8080
+
+redis:
+  host: redis
+  port: 6379

@@ -24,6 +24,7 @@ const (
 	Editor_Add_FullMethodName     = "/api.Editor/Add"
 	Editor_Remove_FullMethodName  = "/api.Editor/Remove"
 	Editor_List_FullMethodName    = "/api.Editor/List"
+	Editor_Auth_FullMethodName    = "/api.Editor/Auth"
 )
 
 // EditorClient is the client API for Editor service.
@@ -42,6 +43,8 @@ type EditorClient interface {
 	Remove(ctx context.Context, in *RemoveRequest, opts ...grpc.CallOption) (*RemoveResponse, error)
 	// Getting full list of DNS servers
 	List(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*ListResponse, error)
+	// Authorizing in server
+	Auth(ctx context.Context, in *AuthRequest, opts ...grpc.CallOption) (*AuthResponse, error)
 }
 
 type editorClient struct {
@@ -102,6 +105,16 @@ func (c *editorClient) List(ctx context.Context, in *ListRequest, opts ...grpc.C
 	return out, nil
 }
 
+func (c *editorClient) Auth(ctx context.Context, in *AuthRequest, opts ...grpc.CallOption) (*AuthResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AuthResponse)
+	err := c.cc.Invoke(ctx, Editor_Auth_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // EditorServer is the server API for Editor service.
 // All implementations must embed UnimplementedEditorServer
 // for forward compatibility
@@ -118,6 +131,8 @@ type EditorServer interface {
 	Remove(context.Context, *RemoveRequest) (*RemoveResponse, error)
 	// Getting full list of DNS servers
 	List(context.Context, *ListRequest) (*ListResponse, error)
+	// Authorizing in server
+	Auth(context.Context, *AuthRequest) (*AuthResponse, error)
 	mustEmbedUnimplementedEditorServer()
 }
 
@@ -139,6 +154,9 @@ func (UnimplementedEditorServer) Remove(context.Context, *RemoveRequest) (*Remov
 }
 func (UnimplementedEditorServer) List(context.Context, *ListRequest) (*ListResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method List not implemented")
+}
+func (UnimplementedEditorServer) Auth(context.Context, *AuthRequest) (*AuthResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Auth not implemented")
 }
 func (UnimplementedEditorServer) mustEmbedUnimplementedEditorServer() {}
 
@@ -243,6 +261,24 @@ func _Editor_List_Handler(srv interface{}, ctx context.Context, dec func(interfa
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Editor_Auth_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AuthRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EditorServer).Auth(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Editor_Auth_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EditorServer).Auth(ctx, req.(*AuthRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Editor_ServiceDesc is the grpc.ServiceDesc for Editor service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -270,100 +306,9 @@ var Editor_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "List",
 			Handler:    _Editor_List_Handler,
 		},
-	},
-	Streams:  []grpc.StreamDesc{},
-	Metadata: "profile.proto",
-}
-
-const (
-	Authorizer_Login_FullMethodName = "/api.Authorizer/Login"
-)
-
-// AuthorizerClient is the client API for Authorizer service.
-//
-// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-//
-// Service for authorizing
-type AuthorizerClient interface {
-	Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error)
-}
-
-type authorizerClient struct {
-	cc grpc.ClientConnInterface
-}
-
-func NewAuthorizerClient(cc grpc.ClientConnInterface) AuthorizerClient {
-	return &authorizerClient{cc}
-}
-
-func (c *authorizerClient) Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(LoginResponse)
-	err := c.cc.Invoke(ctx, Authorizer_Login_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-// AuthorizerServer is the server API for Authorizer service.
-// All implementations must embed UnimplementedAuthorizerServer
-// for forward compatibility
-//
-// Service for authorizing
-type AuthorizerServer interface {
-	Login(context.Context, *LoginRequest) (*LoginResponse, error)
-	mustEmbedUnimplementedAuthorizerServer()
-}
-
-// UnimplementedAuthorizerServer must be embedded to have forward compatible implementations.
-type UnimplementedAuthorizerServer struct {
-}
-
-func (UnimplementedAuthorizerServer) Login(context.Context, *LoginRequest) (*LoginResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Login not implemented")
-}
-func (UnimplementedAuthorizerServer) mustEmbedUnimplementedAuthorizerServer() {}
-
-// UnsafeAuthorizerServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to AuthorizerServer will
-// result in compilation errors.
-type UnsafeAuthorizerServer interface {
-	mustEmbedUnimplementedAuthorizerServer()
-}
-
-func RegisterAuthorizerServer(s grpc.ServiceRegistrar, srv AuthorizerServer) {
-	s.RegisterService(&Authorizer_ServiceDesc, srv)
-}
-
-func _Authorizer_Login_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(LoginRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(AuthorizerServer).Login(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Authorizer_Login_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AuthorizerServer).Login(ctx, req.(*LoginRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-// Authorizer_ServiceDesc is the grpc.ServiceDesc for Authorizer service.
-// It's only intended for direct use with grpc.RegisterService,
-// and not to be introspected or modified (even as a copy)
-var Authorizer_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "api.Authorizer",
-	HandlerType: (*AuthorizerServer)(nil),
-	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "Login",
-			Handler:    _Authorizer_Login_Handler,
+			MethodName: "Auth",
+			Handler:    _Editor_Auth_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

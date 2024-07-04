@@ -24,7 +24,6 @@ option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
     description: "More about gRPC-Gateway";
   }
   schemes: HTTP;
-  schemes: HTTPS;
   consumes: "application/json";
   produces: "application/json";
 
@@ -55,7 +54,7 @@ service Editor {
   // Changing Linux hostname
   rpc SetName(SetNameRequest) returns (SetNameResponse) {
     option (google.api.http) = {
-      patch: "/set_hostname/{hostname}"
+      patch: "/set_hostname"
       body: "*"
     };
   }
@@ -68,7 +67,7 @@ service Editor {
   // Adding the new DNS server to the list
   rpc Add(AddRequest) returns (AddResponse) {
     option (google.api.http) = {
-      post: "/addDNS/{dns_server}"
+      post: "/add_dns"
       body: "*"
     };
   }
@@ -81,14 +80,11 @@ service Editor {
   // Getting full list of DNS servers
   rpc List(ListRequest) returns (ListResponse) {
     option (google.api.http) = {
-      get: "/DNS_list"
+      get: "/dns_list"
     };
   }
-}
-
-// Service for authorizing
-service Authorizer {
-  rpc Login(LoginRequest) returns (LoginResponse) {
+  // Authorizing in server
+  rpc Auth(AuthRequest) returns (AuthResponse) {
     option (google.api.http) = {
       get: "/api/session"
     };
@@ -101,6 +97,8 @@ service Authorizer {
 // Editor
 message SetNameRequest {
   string hostname = 1;
+  string user = 2;
+  string token = 3;
 }
 message SetNameResponse {
   bool ok = 1;
@@ -109,11 +107,14 @@ message SetNameResponse {
 
 message GetNameRequest {}
 message GetNameResponse {
-  string hostname = 1;
+  bool ok = 1;
+  string message = 2;
 }
 
 message AddRequest {
   string dns_server = 1;
+  string user = 2;
+  string token = 3;
 }
 message AddResponse {
   bool ok = 1;
@@ -122,6 +123,8 @@ message AddResponse {
 
 message RemoveRequest {
   string dns_server = 1;
+  string user = 2;
+  string token = 3;
 }
 message RemoveResponse {
   bool ok = 1;
@@ -130,15 +133,15 @@ message RemoveResponse {
 
 message ListRequest {}
 message ListResponse {
-  repeated string dns_servers = 1;
+  bool ok = 1;
+  repeated string message = 2;
 }
 
-// Authorizer
-message LoginRequest {
-  string username = 1;
+message AuthRequest {
+  string user = 1;
   string password = 2;
 }
-message LoginResponse {
+message AuthResponse {
   bool ok = 1;
-  string message = 2;
+  string token = 2;
 }

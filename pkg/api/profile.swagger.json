@@ -16,14 +16,10 @@
   "tags": [
     {
       "name": "Editor"
-    },
-    {
-      "name": "Authorizer"
     }
   ],
   "schemes": [
-    "http",
-    "https"
+    "http"
   ],
   "consumes": [
     "application/json"
@@ -32,41 +28,7 @@
     "application/json"
   ],
   "paths": {
-    "/DNS_list": {
-      "get": {
-        "summary": "Getting full list of DNS servers",
-        "operationId": "Editor_List",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/apiListResponse"
-            }
-          },
-          "403": {
-            "description": "Returned when the user does not have permission to access the resource.",
-            "schema": {}
-          },
-          "404": {
-            "description": "Returned when the resource does not exist.",
-            "schema": {
-              "type": "string",
-              "format": "string"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "tags": [
-          "Editor"
-        ]
-      }
-    },
-    "/addDNS/{dnsServer}": {
+    "/add_dns": {
       "post": {
         "summary": "Adding the new DNS server to the list",
         "operationId": "Editor_Add",
@@ -97,17 +59,11 @@
         },
         "parameters": [
           {
-            "name": "dnsServer",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
             "name": "body",
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/EditorAddBody"
+              "$ref": "#/definitions/apiAddRequest"
             }
           }
         ],
@@ -118,12 +74,13 @@
     },
     "/api/session": {
       "get": {
-        "operationId": "Authorizer_Login",
+        "summary": "Authorizing in server",
+        "operationId": "Editor_Auth",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/apiLoginResponse"
+              "$ref": "#/definitions/apiAuthResponse"
             }
           },
           "403": {
@@ -146,7 +103,7 @@
         },
         "parameters": [
           {
-            "name": "username",
+            "name": "user",
             "in": "query",
             "required": false,
             "type": "string"
@@ -159,7 +116,7 @@
           }
         ],
         "tags": [
-          "Authorizer"
+          "Editor"
         ]
       }
     },
@@ -198,8 +155,54 @@
             "in": "path",
             "required": true,
             "type": "string"
+          },
+          {
+            "name": "user",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "required": false,
+            "type": "string"
           }
         ],
+        "tags": [
+          "Editor"
+        ]
+      }
+    },
+    "/dns_list": {
+      "get": {
+        "summary": "Getting full list of DNS servers",
+        "operationId": "Editor_List",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apiListResponse"
+            }
+          },
+          "403": {
+            "description": "Returned when the user does not have permission to access the resource.",
+            "schema": {}
+          },
+          "404": {
+            "description": "Returned when the resource does not exist.",
+            "schema": {
+              "type": "string",
+              "format": "string"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
         "tags": [
           "Editor"
         ]
@@ -239,7 +242,7 @@
         ]
       }
     },
-    "/set_hostname/{hostname}": {
+    "/set_hostname": {
       "patch": {
         "summary": "Changing Linux hostname",
         "operationId": "Editor_SetName",
@@ -270,17 +273,11 @@
         },
         "parameters": [
           {
-            "name": "hostname",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
             "name": "body",
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/EditorSetNameBody"
+              "$ref": "#/definitions/apiSetNameRequest"
             }
           }
         ],
@@ -291,12 +288,19 @@
     }
   },
   "definitions": {
-    "EditorAddBody": {
-      "type": "object"
-    },
-    "EditorSetNameBody": {
+    "apiAddRequest": {
       "type": "object",
-      "title": "Editor"
+      "properties": {
+        "dnsServer": {
+          "type": "string"
+        },
+        "user": {
+          "type": "string"
+        },
+        "token": {
+          "type": "string"
+        }
+      }
     },
     "apiAddResponse": {
       "type": "object",
@@ -309,26 +313,18 @@
         }
       }
     },
-    "apiGetNameResponse": {
+    "apiAuthResponse": {
       "type": "object",
       "properties": {
-        "hostname": {
+        "ok": {
+          "type": "boolean"
+        },
+        "token": {
           "type": "string"
         }
       }
     },
-    "apiListResponse": {
-      "type": "object",
-      "properties": {
-        "dnsServers": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        }
-      }
-    },
-    "apiLoginResponse": {
+    "apiGetNameResponse": {
       "type": "object",
       "properties": {
         "ok": {
@@ -336,6 +332,20 @@
         },
         "message": {
           "type": "string"
+        }
+      }
+    },
+    "apiListResponse": {
+      "type": "object",
+      "properties": {
+        "ok": {
+          "type": "boolean"
+        },
+        "message": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       }
     },
@@ -349,6 +359,21 @@
           "type": "string"
         }
       }
+    },
+    "apiSetNameRequest": {
+      "type": "object",
+      "properties": {
+        "hostname": {
+          "type": "string"
+        },
+        "user": {
+          "type": "string"
+        },
+        "token": {
+          "type": "string"
+        }
+      },
+      "title": "Editor"
     },
     "apiSetNameResponse": {
       "type": "object",

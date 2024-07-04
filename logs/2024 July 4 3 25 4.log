@@ -1,0 +1,11 @@
+INFO: 2024/07/04 03:25:04 grpcServer:mustInit(): Logging in file
+INFO: 2024/07/04 03:25:04 grpcServer:mustInit(): GRPC the new server created
+INFO: 2024/07/04 03:25:04 grpcServer:mustInit(): Server configuration uploaded
+INFO: 2024/07/04 03:25:04 grpcServer:mustInit(): Server initialized successfully
+INFO: 2024/07/04 03:25:04 grpcServer:dbConnect(): Database connection established
+INFO: 2024/07/04 03:25:04 grpcServer:httpStart(): HTTP proxy listening on: :8080
+INFO: 2024/07/04 03:25:04 grpcServer:mustGrpcStart(): Listening:  :9000
+INFO: 2024/07/04 03:25:04 grpcServer:mustGrpcStart(): Serving:  :9000
+INFO: 2024/07/04 03:26:49 Server is shutting down by: interrupt
+INFO: 2024/07/04 03:26:49 grpcServer:Stop(): GRPC server gracefully stopped
+INFO: 2024/07/04 03:26:49 grpcServer:Stop(): HTTP proxy server gracefully stopped
