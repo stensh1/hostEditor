@@ -14,13 +14,20 @@ services:
     privileged: true
     ports:
       - "8080:8080"
-      - "9000:9000"
+      - "9001:9000"
     networks:
       - backend
     depends_on:
       - redis
     links:
       - redis
+
+  client:
+    image: stensh1/host-editor-client
+    stdin_open: true
+    tty: true
+    networks:
+      - backend
 
 networks:
   backend:

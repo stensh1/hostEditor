@@ -110,7 +110,7 @@ func (c *c) hostname() {
 		log.Fatalf("Could not get hostname: %v", err)
 	}
 
-	fmt.Println(c.conf.u, resp.Message)
+	fmt.Println(c.conf.u, ":", resp.Message)
 }
 
 // dnsList makes a request to get the list of dns servers using 'api' package
